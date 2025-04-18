@@ -1,4 +1,6 @@
 import { Router } from "express";
+import passport from "passport";
+import { authorizeRole } from "../middlewares/auth.js";
 import ProductManagerDB from "../dao/db/ProductManager.db.js";
 
 const productsRouter = Router();
@@ -13,10 +15,8 @@ productsRouter.get("/", async (req, res) => {
         const filterQuery = {};
 
         // Agregar filtros
-        if (category) 
-            {filterQuery.category = category;}
-        if (status === "true" || status === "false") 
-            {filterQuery.status = status === "true";}
+        if (category) { filterQuery.category = category; }
+        if (status === "true" || status === "false") { filterQuery.status = status === "true"; }
 
         const options = {
             limit: parseInt(limit),
@@ -40,10 +40,10 @@ productsRouter.get("/", async (req, res) => {
             prevLink: products.hasPrevPage ? `/products?limit=${limit}&page=${products.prevPage}&sort=${sort}${category ? `&category=${category}` : ''}${status ? `&status=${status}` : ''}` : null,
             nextLink: products.hasNextPage ? `/products?limit=${limit}&page=${products.nextPage}&sort=${sort}${category ? `&category=${category}` : ''}${status ? `&status=${status}` : ''}` : null
         });
-        } catch (error) {
-            console.log("Error en obtener los Productos!", error);
-            res.status(500).send({ status: "error", message: "Error en obtener los Productos!" });
-        }
+    } catch (error) {
+        console.log("Error en obtener los Productos!", error);
+        res.status(500).send({ status: "error", message: "Error en obtener los Productos!" });
+    }
 });
 
 productsRouter.get("/:pid", async (req, res) => {
@@ -100,5 +100,27 @@ productsRouter.delete("/:pid", async (req, res) => {
         res.status(500).json({ error: "Error al eliminar el producto" });
     }
 });
+
+//Crear producto (admin)
+productsRouter.post(
+    '/',
+    passport.authenticate('jwt', { session: false }),
+    authorizeRole('admin'),
+    async (req, res) => {
+        // lógica para crear producto
+        res.status(201).json({ message: 'Producto creado' });
+    }
+);
+
+//Eliminar producto (admin)
+productsRouter.delete(
+    '/:pid',
+    passport.authenticate('jwt', { session: false }),
+    authorizeRole('admin'),
+    async (req, res) => {
+        // lógica para eliminar producto
+        res.status(200).json({ message: 'Producto eliminado' });
+    }
+);
 
 export default productsRouter;

@@ -5,9 +5,13 @@ import __dirname from "./utils.js";
 import productsRouter from "./routers/productsRouter.js";
 import cartsRouter from "./routers/cartsRouter.js";
 import viewsRouter from "./routers/viewsRouter.js";
+import sessionsRouter from "./routers/sessionsRouter.js";
 import ProductManagerDB from "./dao/db/ProductManager.db.js";
 import helpers from "./views/helpers/helpers.js";
 import mongoose from "mongoose";
+import passport from "passport";
+//import "./config/passport.js";
+import initializePassport from "./config/passport.js";
 
 const app = express();
 const port = 8080;
@@ -29,9 +33,14 @@ if (connectDB) {
     console.log("Conectado a MongoDB");
 }
 
+//Passport
+initializePassport();
+app.use(passport.initialize());
+
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/", viewsRouter);
+app.use("/api/sessions", sessionsRouter);
 
 const PM = new ProductManagerDB();
 

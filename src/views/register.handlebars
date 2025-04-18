@@ -1,0 +1,48 @@
+<h2>Registrarse</h2>
+<form id="registerForm">
+    <label>Nombre:</label>
+    <input type="text" name="first_name" required />
+
+    <label>Apellido:</label>
+    <input type="text" name="last_name" required />
+
+    <label>Email:</label>
+    <input type="email" name="email" required />
+
+    <label>Edad:</label>
+    <input type="number" name="age" required />
+
+    <label>Contraseña:</label>
+    <input type="password" name="password" required />
+
+    <button type="submit">Crear cuenta</button>
+</form>
+
+<p>¿Ya tenés cuenta? <a href="/login">Iniciá sesión</a></p>
+
+<script>
+    const form = document.getElementById('registerForm');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = {
+            first_name: form.first_name.value,
+            last_name: form.last_name.value,
+            email: form.email.value,
+            age: parseInt(form.age.value),
+            password: form.password.value,
+        };
+
+        const res = await fetch('/api/sessions/register', {
+            method: 'POST',
+            body: JSON.stringify(data),
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (res.ok) {
+            alert('Usuario registrado exitosamente');
+            window.location.href = '/login';
+        } else {
+            alert('Error al registrar usuario');
+        }
+    });
+</script>

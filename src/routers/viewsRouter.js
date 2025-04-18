@@ -1,4 +1,5 @@
 import { Router } from "express";
+import passport from "passport";
 import ProductManagerDB from "../dao/db/ProductManager.db.js";
 import CartManagerDB from "../dao/db/CartManager.db.js";
 
@@ -10,14 +11,14 @@ router.get("/", async (req, res) => {
     try {
         // Extraer parámetros
         const { limit = 10, page = 1, sort, category, status } = req.query;
-        
+
         // Construir el objeto
         const filterQuery = {};
-        
+
         if (category) {
             filterQuery.category = category;
         }
-        
+
         if (status === "true" || status === "false") {
             filterQuery.status = status === "true";
         }
@@ -29,10 +30,10 @@ router.get("/", async (req, res) => {
             sort,
             query: filterQuery
         };
-        
+
         const result = await PM.getProducts(options);
-        
-        res.render("home", { 
+
+        res.render("home", {
             products: result.payload,
             pagination: {
                 page: result.page,
@@ -62,14 +63,14 @@ router.get("/carts", async (req, res) => {
     try {
         const carts = await CM.getCarts();
         const cart = await CM.getCartById(carts[0]._id);
-        
+
         if (!cart) {
-            return res.status(404).render("error", { 
-                message: "Carrito no encontrado" 
+            return res.status(404).render("error", {
+                message: "Carrito no encontrado"
             });
         }
 
-        res.render("cart", { 
+        res.render("cart", {
             cartId: cart._id,
             products: cart.products,
             totalItems: cart.totalItems,
@@ -78,10 +79,22 @@ router.get("/carts", async (req, res) => {
         });
     } catch (error) {
         console.error("Error al obtener el carrito:", error);
-        res.status(500).render("error", { 
-            message: "Error al cargar el carrito" 
+        res.status(500).render("error", {
+            message: "Error al cargar el carrito"
         });
     }
+});
+
+router.get("/login", (req, res) => {
+    res.render("login");
+});
+
+router.get("/register", (req, res) => {
+    res.render("register");
+});
+
+router.get('/profile', passport.authenticate('jwt', {session: false}), (req, res) => {
+    res.render('profile', {user: req.user});
 });
 
 export default router;
