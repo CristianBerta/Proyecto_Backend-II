@@ -1,0 +1,52 @@
+<h1>Lista de Productos en Tiempo Real</h1>
+<ul id="product-list">
+</ul>
+
+<h2>Agregar Producto</h2>
+<form id="product-form">
+    <input type="text" id="title" placeholder="Título" required />
+    <input type="text" id="description" placeholder="Descripción" required />
+    <input type="text" id="code" placeholder="Código" required />
+    <input type="number" id="price" placeholder="Precio" required />
+    <input type="number" id="stock" placeholder="Stock" required />
+    <input type="text" id="category" placeholder="Categoría" required />
+    <input type="text" id="image" placeholder="Imagen URL" />
+    <button type="submit">Agregar</button>
+</form>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/realTimeProducts.js"></script>
+
+<style>
+    #product-form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 500px;
+        margin-bottom: 30px;
+    }
+    
+    #product-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    
+    #product-list li {
+        padding: 10px;
+        margin-bottom: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    #product-list button {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+</style>
