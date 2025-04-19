@@ -1,55 +1,71 @@
+// src/routers/sessionsRouter.js
 import { Router } from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
-import UserModel from "../dao/models/user.model.js";
+import config from "../config/config.js";
+import UserManagerDB from "../dao/db/UserManager.db.js";
 
-const sessionsRouter = Router();
+const router = Router();
+const userManager = new UserManagerDB();
 
-//Registro
-sessionsRouter.post("/register", async (req, res) => {
-    try {
-        const { first_name, last_name, email, age, password } = req.body;
-
-        const exists = await UserModel.findOne({ email });
-        if (exists) return res.status(400).json({ message: "El usuario ya existe" });
-
-        const newUser = new UserModel({ first_name, last_name, email, age, password });
-        await newUser.save();
-
-        res.status(201).json({ message: "Usuario registrado con éxito" });
-    } catch (error) {
-        res.status(500).json({ message: "Error al registrar usuario", error });
-    }
-});
-
-//Login
-sessionsRouter.post("/login", async (req, res) => {
-    try {
-        const { email, password } = req.body;
-
-        const user = await UserModel.findOne({ email });
-        if (!user) return res.status(401).json({ message: "Usuario no encontrado" });
-
-        const isValid = await user.comparePassword(password);
-        if (!isValid) return res.status(401).json({ message: "Contraseña incorrecta" });
-
-        const token = jwt.sign({ user: { id: user._id, role: user.role } }, "jwtSecret", {
-            expiresIn: "1h",
-        });
-
-        res.status(200).json({ message: "Login exitoso", token });
-    } catch (error) {
-        res.status(500).json({ message: "Error al loguear usuario", error });
-    }
-});
-
-//Current
-sessionsRouter.get(
-    "/current",
-    passport.authenticate("jwt", { session: false }),
-    (req, res) => {
-        res.json({ user: req.user });
+// Register endpoint
+router.post("/register",
+    passport.authenticate('register', { failureRedirect: '/register', session: false }),
+    async (req, res) => {
+        res.status(201).json({ status: "success", message: "User registered" });
     }
 );
 
-export default sessionsRouter;
+// Login endpoint
+router.post("/login",
+    passport.authenticate('login', { session: false }),
+    async (req, res) => {
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: req.user._id, email: req.user.email, role: req.user.role },
+            config.jwtSecret,
+            { expiresIn: '1h' }
+        );
+
+        // Send token in cookie
+        res.cookie('jwt', token, { httpOnly: true, maxAge: 3600000 }); // 1 hour
+
+        res.json({
+            status: "success",
+            message: "Login successful",
+            token,
+            user: {
+                name: `${req.user.first_name} ${req.user.last_name}`,
+                email: req.user.email,
+                role: req.user.role
+            }
+        });
+    }
+);
+
+// Logout endpoint
+router.post("/logout", (req, res) => {
+    res.clearCookie('jwt');
+    res.json({ status: "success", message: "Logout successful" });
+});
+
+// Current user endpoint
+router.get("/current",
+    passport.authenticate('current', { session: false }),
+    (req, res) => {
+        // Return user data without sensitive information
+        const user = {
+            id: req.user._id,
+            first_name: req.user.first_name,
+            last_name: req.user.last_name,
+            email: req.user.email,
+            age: req.user.age,
+            cart: req.user.cart,
+            role: req.user.role
+        };
+
+        res.json({ status: "success", user });
+    }
+);
+
+export default router;

@@ -1,13 +1,21 @@
-export function authorizeRole(role) {
-    return (req, res, next) => {
-        if (!req.user) {
-            return res.status(401).json({ message: 'No autenticado' });
-        }
+import passport from "passport";
 
-        if (req.user.role !== role) {
-            return res.status(403).json({ message: 'No autorizado' });
+export const isAuthenticated = (req, res, next) => {
+    passport.authenticate('jwt', { session: false }, (err, user, info) => {
+        if (err) {
+            return next(err);
         }
+        if (!user) {
+            return res.status(401).json({ status: "error", message: "Unauthorized" });
+        }
+        req.user = user;
+        return next();
+    })(req, res, next);
+};
 
-        next();
-    };
-}
+export const isAdmin = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        return next();
+    }
+    return res.status(403).json({ status: "error", message: "Access denied" });
+};

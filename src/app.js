@@ -10,8 +10,9 @@ import ProductManagerDB from "./dao/db/ProductManager.db.js";
 import helpers from "./views/helpers/helpers.js";
 import mongoose from "mongoose";
 import passport from "passport";
-//import "./config/passport.js";
+import cookieParser from "cookie-parser";
 import initializePassport from "./config/passport.js";
+import config from "./config/config.js"
 
 const app = express();
 const port = 8080;
@@ -27,20 +28,22 @@ app.set("view engine", "handlebars");
 app.use(express.static(__dirname + "/public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser(config.cookieSecret));
+
+//Passport
+initializePassport();
+app.use(passport.initialize());
 
 const connectDB = await mongoose.connect("mongodb+srv://cristian:Adidas88!@cluster0.ehtm7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 if (connectDB) {
     console.log("Conectado a MongoDB");
 }
 
-//Passport
-initializePassport();
-app.use(passport.initialize());
-
+//Rutas
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
-app.use("/", viewsRouter);
 app.use("/api/sessions", sessionsRouter);
+app.use("/", viewsRouter);
 
 const PM = new ProductManagerDB();
 
