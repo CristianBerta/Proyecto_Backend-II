@@ -1,0 +1,39 @@
+<div class="container">
+    <h1>Mi Perfil</h1>
+
+    <div class="profile-info">
+        <p><strong>Nombre:</strong> {{user.first_name}} {{user.last_name}}</p>
+        <p><strong>Email:</strong> {{user.email}}</p>
+        <p><strong>Edad:</strong> {{user.age}}</p>
+        <p><strong>Rol:</strong> {{user.role}}</p>
+    </div>
+
+    <div class="profile-actions">
+        <a href="/carts" class="btn btn-primary">Ver mi carrito</a>
+        <button id="logoutBtn" class="btn btn-danger">Cerrar sesión</button>
+    </div>
+</div>
+
+<script>
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/sessions/logout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                localStorage.removeItem('token');
+                alert('Sesión cerrada correctamente');
+                window.location.href = '/login';
+            }
+        } catch (error) {
+            console.error('Error al cerrar sesión:', error);
+            alert('Error al cerrar sesión');
+        }
+    });
+</script>

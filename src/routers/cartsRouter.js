@@ -5,6 +5,21 @@ import mongoose from "mongoose";
 const cartsRouter = Router();
 const CM = new CartManagerDB();
 
+// Validación de ID como middleware
+const validateId = (req, res, next) => {
+    const cartId = req.params.cid;
+    if (cartId && !mongoose.Types.ObjectId.isValid(cartId)) {
+        return res.status(400).json({ error: "ID de carrito inválido" });
+    }
+    
+    const productId = req.params.pid;
+    if (productId && !mongoose.Types.ObjectId.isValid(productId)) {
+        return res.status(400).json({ error: "ID de producto inválido" });
+    }
+    
+    next();
+};
+
 cartsRouter.post("/", async (req, res) => {
     try {
         const newCart = await CM.createCart();
@@ -15,11 +30,38 @@ cartsRouter.post("/", async (req, res) => {
     }
 });
 
-cartsRouter.get("/carts", async (req, res) => {
+// cartsRouter.get("/carts", async (req, res) => {
+//     try {
+//         const cart = await CM.getCarts();
+//         if (cart) {
+//             res.send(cart);
+//         } else {
+//             res.status(404).json({ error: "Carrito no encontrado" });
+//         }
+//     } catch (error) {
+//         console.error("Error al obtener el carrito:", error);
+//         res.status(500).json({ error: "Error al obtener el carrito" });
+//     }
+// });
+
+// Obtener todos los carritos
+cartsRouter.get("/", async (req, res) => {
     try {
-        const cart = await CM.getCarts();
+        const carts = await CM.getCarts();
+        res.json(carts);
+    } catch (error) {
+        console.error("Error al obtener los carritos:", error);
+        res.status(500).json({ error: "Error al obtener los carritos" });
+    }
+});
+
+// Obtener un carrito por ID
+cartsRouter.get("/:cid", validateId, async (req, res) => {
+    try {
+        const cartId = req.params.cid;
+        const cart = await CM.getCartById(cartId);
         if (cart) {
-            res.send(cart);
+            res.json(cart);
         } else {
             res.status(404).json({ error: "Carrito no encontrado" });
         }
@@ -29,7 +71,7 @@ cartsRouter.get("/carts", async (req, res) => {
     }
 });
 
-cartsRouter.post("/:cid/product/:pid", async (req, res) => {
+cartsRouter.post("/:cid/product/:pid", validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
@@ -45,7 +87,7 @@ cartsRouter.post("/:cid/product/:pid", async (req, res) => {
     }
 });
 
-cartsRouter.delete("/:cid/products/:pid", async (req, res) => {
+cartsRouter.delete("/:cid/products/:pid", validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
@@ -66,7 +108,7 @@ cartsRouter.delete("/:cid/products/:pid", async (req, res) => {
     }
 });
 
-cartsRouter.put("/:cid", async (req, res) => {
+cartsRouter.put("/:cid", validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const { products } = req.body;
@@ -99,7 +141,7 @@ cartsRouter.put("/:cid", async (req, res) => {
     }
 });
 
-cartsRouter.put("/:cid/products/:pid", async (req, res) => {
+cartsRouter.put("/:cid/products/:pid", validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
@@ -127,7 +169,7 @@ cartsRouter.put("/:cid/products/:pid", async (req, res) => {
     }
 });
 
-cartsRouter.delete("/:cid", async (req, res) => {
+cartsRouter.delete("/:cid", validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         

@@ -11,7 +11,7 @@ import helpers from "./views/helpers/helpers.js";
 import mongoose from "mongoose";
 import passport from "passport";
 import cookieParser from "cookie-parser";
-import initializePassport from "./config/passport.js";
+import initializePassport from "./config/passport.config.js";
 import config from "./config/config.js"
 
 const app = express();
