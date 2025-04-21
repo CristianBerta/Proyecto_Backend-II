@@ -1,9 +1,12 @@
 import { Router } from "express";
 import CartManagerDB from "../dao/db/CartManager.db.js";
+import UserManagerDB from "../dao/db/UserManager.db.js";
 import mongoose from "mongoose";
+import { isAuthenticated } from "../middlewares/auth.js";
 
 const cartsRouter = Router();
 const CM = new CartManagerDB();
+const UM = new UserManagerDB();
 
 // Validación de ID como middleware
 const validateId = (req, res, next) => {
@@ -20,7 +23,7 @@ const validateId = (req, res, next) => {
     next();
 };
 
-cartsRouter.post("/", async (req, res) => {
+cartsRouter.post("/", isAuthenticated, async (req, res) => {
     try {
         const newCart = await CM.createCart();
         res.status(201).json(newCart);
@@ -30,33 +33,33 @@ cartsRouter.post("/", async (req, res) => {
     }
 });
 
-// cartsRouter.get("/carts", async (req, res) => {
-//     try {
-//         const cart = await CM.getCarts();
-//         if (cart) {
-//             res.send(cart);
-//         } else {
-//             res.status(404).json({ error: "Carrito no encontrado" });
-//         }
-//     } catch (error) {
-//         console.error("Error al obtener el carrito:", error);
-//         res.status(500).json({ error: "Error al obtener el carrito" });
-//     }
-// });
-
 // Obtener todos los carritos
-cartsRouter.get("/", async (req, res) => {
+cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
     try {
-        const carts = await CM.getCarts();
-        res.json(carts);
+        const user = await UM.getUserById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+        
+        if (!user.cart) {
+            return res.status(404).json({ error: "No tienes un carrito asociado a la cuenta" });
+        }
+
+        const cart = await CM.getCartById(user.cart.toString());
+        if (cart) {
+            res.json(cart);
+        } else {
+            res.status(404).json({ error: "Carrito no encontrado" });
+        }
     } catch (error) {
         console.error("Error al obtener los carritos:", error);
         res.status(500).json({ error: "Error al obtener los carritos" });
     }
 });
 
-// Obtener un carrito por ID
-cartsRouter.get("/:cid", validateId, async (req, res) => {
+// Obtener carrito por ID
+cartsRouter.get("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const cart = await CM.getCartById(cartId);
@@ -71,11 +74,38 @@ cartsRouter.get("/:cid", validateId, async (req, res) => {
     }
 });
 
-cartsRouter.post("/:cid/product/:pid", validateId, async (req, res) => {
+
+//Agregar producto
+// cartsRouter.post("/:cid/product/:pid", isAuthenticated, async (req, res) => {
+//     try {
+//         const cartId = req.params.cid;
+//         console.log("agregar al carrito ", cartId);
+//         const productId = req.params.pid;
+//         const cart = await CM.addProductToCart(cartId, productId);
+//         if (cart) {
+//             res.json(cart);
+//         } else {
+//             res.status(404).json({ error: "Carrito no encontrado" });
+//         }
+//     } catch (error) {
+//         console.error("Error al agregar producto al carrito:", error);
+//         res.status(500).json({ error: "Error al agregar producto al carrito" });
+//     }
+// });
+// Add a new route that uses the user's cart automatically
+cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, res) => {
     try {
-        const cartId = req.params.cid;
         const productId = req.params.pid;
+        const user = await UM.getUserById(req.user.id);
+        
+        if (!user.cart) {
+            return res.status(404).json({ error: "No tienes un carrito asociado a la cuenta" });
+        }
+        
+        const cartId = user.cart._id.toString();
+        console.log(cartId);
         const cart = await CM.addProductToCart(cartId, productId);
+        
         if (cart) {
             res.json(cart);
         } else {
@@ -87,7 +117,7 @@ cartsRouter.post("/:cid/product/:pid", validateId, async (req, res) => {
     }
 });
 
-cartsRouter.delete("/:cid/products/:pid", validateId, async (req, res) => {
+cartsRouter.delete("/:cid/products/:pid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
@@ -108,7 +138,7 @@ cartsRouter.delete("/:cid/products/:pid", validateId, async (req, res) => {
     }
 });
 
-cartsRouter.put("/:cid", validateId, async (req, res) => {
+cartsRouter.put("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const { products } = req.body;
@@ -141,7 +171,7 @@ cartsRouter.put("/:cid", validateId, async (req, res) => {
     }
 });
 
-cartsRouter.put("/:cid/products/:pid", validateId, async (req, res) => {
+cartsRouter.put("/:cid/products/:pid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
@@ -169,7 +199,7 @@ cartsRouter.put("/:cid/products/:pid", validateId, async (req, res) => {
     }
 });
 
-cartsRouter.delete("/:cid", validateId, async (req, res) => {
+cartsRouter.delete("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         

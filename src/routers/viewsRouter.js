@@ -71,12 +71,10 @@ router.get("/profile", isAuthenticated, (req, res) => {
     res.render("profile", { user: req.user });
 });
 
-// RealTime products - Protected
 router.get("/realtimeproducts", isAuthenticated, (req, res) => {
     res.render("realTimeProducts", { user: req.user });
 });
 
-// User's cart - Protected 
 router.get("/carts", isAuthenticated, async (req, res) => {
     try {
         // Verificar si el usuario tiene un carrito asociado
@@ -90,25 +88,6 @@ router.get("/carts", isAuthenticated, async (req, res) => {
         const cartId = req.user.cart;
         console.log("carrito:", cartId);
         const cart = await CM.getCartById(cartId);
-    // try {
-    //     // If user has a cart in their profile, use that cart ID
-    //     let cartId;
-        
-    //     if (req.user && req.user.cart) {
-    //         cartId = req.user.cart;
-    //     } else {
-    //         // Fallback to getting the first cart if no user cart exists
-    //         const carts = await CM.getCarts();
-    //         if (carts && carts.length > 0) {
-    //             cartId = carts[0]._id;
-    //         } else {
-    //             return res.status(404).render("error", { 
-    //                 message: "No hay carritos disponibles"
-    //             });
-    //         }
-    //     }
-        
-    //     const cart = await CM.getCartById(cartId);
         
         if (!cart) {
             return res.status(404).render("error", { 

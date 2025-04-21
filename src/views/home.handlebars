@@ -90,7 +90,7 @@
                 }
                 
                 // Agregar el producto al carrito
-                const response = await fetch(`/api/carts/${cartId}/product/${productId}`, {
+                const response = await fetch(`/api/carts/user/product/${productId}`, {
                     method: 'POST'
                 });
                 

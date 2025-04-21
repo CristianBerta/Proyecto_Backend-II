@@ -1,4 +1,3 @@
-// src/routers/sessionsRouter.js
 import { Router } from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
@@ -22,7 +21,7 @@ router.post("/login",
     async (req, res) => {
         // Generate JWT token
         const token = jwt.sign(
-            { id: req.user._id, email: req.user.email, role: req.user.role },
+            { id: req.user._id, email: req.user.email, role: req.user.role, cart: req.user.cart ? req.user.cart.toString() : null },
             config.jwtSecret,
             { expiresIn: '1h' }
         );
@@ -37,7 +36,8 @@ router.post("/login",
             user: {
                 name: `${req.user.first_name} ${req.user.last_name}`,
                 email: req.user.email,
-                role: req.user.role
+                role: req.user.role,
+                cart: req.user.cart ? req.user.cart.toString() : null
             }
         });
     }

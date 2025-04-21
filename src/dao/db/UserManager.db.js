@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import userModel from "../models/user.model.js";
 import bcrypt from "bcrypt";
 
@@ -25,7 +26,7 @@ class UserManagerDB {
 
     async getUserByEmail(email) {
         try {
-            return await this.userModel.findOne({ email });
+            return await this.userModel.findOne({ email }).populate('email').lean();
         } catch (error) {
             throw new Error(`Error finding user by email: ${error.message}`);
         }
@@ -33,7 +34,7 @@ class UserManagerDB {
 
     async getUserById(id) {
         try {
-            return await this.userModel.findById(id);
+            return await this.userModel.findById(id).populate('cart').lean();
         } catch (error) {
             throw new Error(`Error finding user by ID: ${error.message}`);
         }
