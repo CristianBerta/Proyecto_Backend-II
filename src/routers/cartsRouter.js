@@ -23,6 +23,7 @@ const validateId = (req, res, next) => {
     next();
 };
 
+//Crear carrito
 cartsRouter.post("/", isAuthenticated, async (req, res) => {
     try {
         const newCart = await CM.createCart();
@@ -33,7 +34,7 @@ cartsRouter.post("/", isAuthenticated, async (req, res) => {
     }
 });
 
-// Obtener todos los carritos
+//Obtener todos los carritos
 cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
     try {
         const user = await UM.getUserById(req.user.id);
@@ -74,25 +75,7 @@ cartsRouter.get("/:cid", isAuthenticated, validateId, async (req, res) => {
     }
 });
 
-
-//Agregar producto
-// cartsRouter.post("/:cid/product/:pid", isAuthenticated, async (req, res) => {
-//     try {
-//         const cartId = req.params.cid;
-//         console.log("agregar al carrito ", cartId);
-//         const productId = req.params.pid;
-//         const cart = await CM.addProductToCart(cartId, productId);
-//         if (cart) {
-//             res.json(cart);
-//         } else {
-//             res.status(404).json({ error: "Carrito no encontrado" });
-//         }
-//     } catch (error) {
-//         console.error("Error al agregar producto al carrito:", error);
-//         res.status(500).json({ error: "Error al agregar producto al carrito" });
-//     }
-// });
-// Add a new route that uses the user's cart automatically
+//Agregar producto al carrito
 cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, res) => {
     try {
         const productId = req.params.pid;
@@ -117,6 +100,7 @@ cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, 
     }
 });
 
+//Eliminar producto del carrito
 cartsRouter.delete("/:cid/products/:pid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
@@ -199,6 +183,7 @@ cartsRouter.put("/:cid/products/:pid", isAuthenticated, validateId, async (req, 
     }
 });
 
+//Vaciar carrito
 cartsRouter.delete("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;

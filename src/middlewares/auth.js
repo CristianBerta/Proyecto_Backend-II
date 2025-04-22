@@ -6,7 +6,7 @@ export const isAuthenticated = (req, res, next) => {
             return next(err);
         }
         if (!user) {
-            return res.status(401).json({ status: "error", message: "Unauthorized" });
+            return res.status(401).json({ status: "error", message: "No Autorizado" });
         }
         req.user = user;
         return next();
@@ -17,5 +17,5 @@ export const isAdmin = (req, res, next) => {
     if (req.user && req.user.role === 'admin') {
         return next();
     }
-    return res.status(403).json({ status: "error", message: "Access denied" });
+    return res.status(403).json({ status: "error", message: "Acceso Denegado" });
 };

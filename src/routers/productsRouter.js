@@ -6,7 +6,7 @@ import ProductManagerDB from "../dao/db/ProductManager.db.js";
 const productsRouter = Router();
 const PM = new ProductManagerDB();
 
-// Obtener todos los productos (público)
+//Obtener todos los productos (público)
 productsRouter.get("/", async (req, res) => {
     try {
         // Extraer parámetros
@@ -47,7 +47,7 @@ productsRouter.get("/", async (req, res) => {
     }
 });
 
-// Obtener un producto por ID (público)
+//Obtener un producto por ID (público)
 productsRouter.get("/:pid", async (req, res) => {
     try {
         const product = await PM.getProductById(req.params.pid);
@@ -61,7 +61,7 @@ productsRouter.get("/:pid", async (req, res) => {
     }
 });
 
-// Crear producto (solo admin)
+//Crear producto (solo admin)
 productsRouter.post("/", isAuthenticated, isAdmin, async (req, res) => {
     try {
         const { title, description, code, price, status, stock, category, thumbnails } = req.body;
@@ -80,7 +80,7 @@ productsRouter.post("/", isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// Actualizar producto (solo admin)
+//Actualizar producto (solo admin)
 productsRouter.put("/:pid", isAuthenticated, isAdmin, async (req, res) => {
     try {
         const updatedProduct = await PM.updateProduct(req.params.pid, req.body);
@@ -99,7 +99,7 @@ productsRouter.put("/:pid", isAuthenticated, isAdmin, async (req, res) => {
     }
 });
 
-// Eliminar producto (solo admin)
+//Eliminar producto (solo admin)
 productsRouter.delete("/:pid", isAuthenticated, isAdmin, async (req, res) => {
     try {
         const deleted = await PM.deleteProduct(req.params.pid);

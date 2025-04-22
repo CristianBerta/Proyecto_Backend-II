@@ -9,10 +9,9 @@ class UserManagerDB {
 
     async createUser(userData) {
         try {
-            // Hash the password
+            //Hash del password
             const hashedPassword = bcrypt.hashSync(userData.password, 10);
 
-            // Create the user with hashed password
             const user = await this.userModel.create({
                 ...userData,
                 password: hashedPassword
@@ -28,7 +27,7 @@ class UserManagerDB {
         try {
             return await this.userModel.findOne({ email }).populate('email').lean();
         } catch (error) {
-            throw new Error(`Error finding user by email: ${error.message}`);
+            throw new Error(`Error al obtener el usuario por email: ${error.message}`);
         }
     }
 
@@ -36,7 +35,7 @@ class UserManagerDB {
         try {
             return await this.userModel.findById(id).populate('cart').lean();
         } catch (error) {
-            throw new Error(`Error finding user by ID: ${error.message}`);
+            throw new Error(`Error al obtener el usuario por ID: ${error.message}`);
         }
     }
 }

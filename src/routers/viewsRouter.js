@@ -7,7 +7,6 @@ const router = Router();
 const PM = new ProductManagerDB();
 const CM = new CartManagerDB();
 
-// Public routes
 router.get("/login", (req, res) => {
     res.render("login");
 });
@@ -16,7 +15,7 @@ router.get("/register", (req, res) => {
     res.render("register");
 });
 
-// Home route - Showing products with pagination
+//Paginacion
 router.get("/", async (req, res) => {
     try {
         // Extraer parámetros
@@ -58,7 +57,7 @@ router.get("/", async (req, res) => {
                 status,
                 sort
             },
-            user: req.user // Pass user data if available
+            user: req.user
         });
     } catch (error) {
         console.error("Error al cargar productos:", error);
@@ -66,7 +65,7 @@ router.get("/", async (req, res) => {
     }
 });
 
-// Protected routes
+//Rutas protegidas
 router.get("/profile", isAuthenticated, (req, res) => {
     res.render("profile", { user: req.user });
 });
@@ -77,7 +76,7 @@ router.get("/realtimeproducts", isAuthenticated, (req, res) => {
 
 router.get("/carts", isAuthenticated, async (req, res) => {
     try {
-        // Verificar si el usuario tiene un carrito asociado
+        //Verificar si el usuario tiene un carrito
         if (!req.user || !req.user.cart) {
             console.log("Sin carrito:", req.user);
             return res.status(404).render("error", { 
@@ -111,7 +110,6 @@ router.get("/carts", isAuthenticated, async (req, res) => {
     }
 });
 
-// Specific cart by ID - Protected
 router.get("/carts/:cid", isAuthenticated, async (req, res) => {
     try {
         const cartId = req.params.cid;

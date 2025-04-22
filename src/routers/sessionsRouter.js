@@ -7,27 +7,27 @@ import UserManagerDB from "../dao/db/UserManager.db.js";
 const router = Router();
 const userManager = new UserManagerDB();
 
-// Register endpoint
+//Registro
 router.post("/register",
     passport.authenticate('register', { failureRedirect: '/register', session: false }),
     async (req, res) => {
-        res.status(201).json({ status: "success", message: "User registered" });
+        res.status(201).json({ status: "success", message: "Usuario registrado" });
     }
 );
 
-// Login endpoint
+//Login
 router.post("/login",
     passport.authenticate('login', { session: false }),
     async (req, res) => {
-        // Generate JWT token
+        //JWT token
         const token = jwt.sign(
             { id: req.user._id, email: req.user.email, role: req.user.role, cart: req.user.cart ? req.user.cart.toString() : null },
             config.jwtSecret,
             { expiresIn: '1h' }
         );
 
-        // Send token in cookie
-        res.cookie('jwt', token, { httpOnly: true, maxAge: 3600000 }); // 1 hour
+        //Token a cookie
+        res.cookie('jwt', token, { httpOnly: true, maxAge: 3600000 });
 
         res.json({
             status: "success",
@@ -43,17 +43,16 @@ router.post("/login",
     }
 );
 
-// Logout endpoint
+//Logout
 router.post("/logout", (req, res) => {
     res.clearCookie('jwt');
     res.json({ status: "success", message: "Logout successful" });
 });
 
-// Current user endpoint
+//Current
 router.get("/current",
     passport.authenticate('current', { session: false }),
     (req, res) => {
-        // Return user data without sensitive information
         const user = {
             id: req.user._id,
             first_name: req.user.first_name,
