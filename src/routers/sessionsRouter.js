@@ -3,9 +3,12 @@ import passport from "passport";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
 import UserManagerDB from "../dao/db/UserManager.db.js";
+import UserRepository from "../repositories/user.repository.js";
+import UserDTO from "../dto/userDTO.js";
 
 const router = Router();
 const userManager = new UserManagerDB();
+const UR = new UserRepository(userManager);
 
 //Registro
 router.post("/register",
@@ -53,15 +56,16 @@ router.post("/logout", (req, res) => {
 router.get("/current",
     passport.authenticate('current', { session: false }),
     (req, res) => {
-        const user = {
-            id: req.user._id,
-            first_name: req.user.first_name,
-            last_name: req.user.last_name,
-            email: req.user.email,
-            age: req.user.age,
-            cart: req.user.cart,
-            role: req.user.role
-        };
+        const userDTO = new UserDTO(req.user);
+        // const user = {
+        //     id: req.user._id,
+        //     first_name: req.user.first_name,
+        //     last_name: req.user.last_name,
+        //     email: req.user.email,
+        //     age: req.user.age,
+        //     cart: req.user.cart,
+        //     role: req.user.role
+        // };
 
         res.json({ status: "success", user });
     }

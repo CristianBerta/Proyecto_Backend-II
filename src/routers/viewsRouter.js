@@ -1,11 +1,15 @@
 import { Router } from "express";
 import ProductManagerDB from "../dao/db/ProductManager.db.js";
+import ProductRepository from "../repositories/product.repository.js";
 import CartManagerDB from "../dao/db/CartManager.db.js";
+import CartRepository from "../repositories/cart.repository.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 
 const router = Router();
 const PM = new ProductManagerDB();
+const PR = new ProductRepository(PM);
 const CM = new CartManagerDB();
+const CR = new CartRepository(CM);
 
 router.get("/login", (req, res) => {
     res.render("login");
@@ -40,7 +44,8 @@ router.get("/", async (req, res) => {
             query: filterQuery
         };
         
-        const result = await PM.getProducts(options);
+        //const result = await PM.getProducts(options);
+        const result = await PR.getProducts(options);
         
         res.render("home", { 
             products: result.payload,
@@ -86,7 +91,8 @@ router.get("/carts", isAuthenticated, async (req, res) => {
         
         const cartId = req.user.cart;
         console.log("carrito:", cartId);
-        const cart = await CM.getCartById(cartId);
+        //const cart = await CM.getCartById(cartId);
+        const cart = await CR.getCartById(cartId);
         
         if (!cart) {
             return res.status(404).render("error", { 
@@ -113,7 +119,8 @@ router.get("/carts", isAuthenticated, async (req, res) => {
 router.get("/carts/:cid", isAuthenticated, async (req, res) => {
     try {
         const cartId = req.params.cid;
-        const cart = await CM.getCartById(cartId);
+        //const cart = await CM.getCartById(cartId);
+        const cart = await CR.getCartById(cartId);
         
         if (!cart) {
             return res.status(404).render("error", { 
