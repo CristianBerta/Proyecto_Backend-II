@@ -73,7 +73,7 @@ class CartRepository {
             }
 
             await cart.save();
-            return await this.getById(cartId);
+            return await this.getCartById(cartId);
         } catch (error) {
             console.error(`Error al agregar producto ${productId} al carrito ${cartId}:`, error);
             throw error;

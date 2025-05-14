@@ -1,11 +1,9 @@
 import { Router } from "express";
 import passport from "passport";
 import { isAuthenticated, isAdmin } from "../middlewares/auth.js";
-//import ProductManagerDB from "../dao/db/ProductManager.db.js";
 import ProductService from "../services/product.service.js";
 
 const productsRouter = Router();
-//const PM = new ProductManagerDB();
 const PS = new ProductService();
 
 //Obtener todos los productos (público)

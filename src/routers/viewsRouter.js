@@ -1,11 +1,11 @@
 import { Router } from "express";
-import ProductManagerDB from "../dao/db/ProductManager.db.js";
-import CartManagerDB from "../dao/db/CartManager.db.js";
+import ProductService from "../services/product.service.js";
+import CartService from "../services/cart.service.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 
 const router = Router();
-const PM = new ProductManagerDB();
-const CM = new CartManagerDB();
+const PS = new ProductService();
+const CS = new CartService();
 
 router.get("/login", (req, res) => {
     res.render("login");
@@ -40,8 +40,8 @@ router.get("/", async (req, res) => {
             query: filterQuery
         };
         
-        //const result = await PM.getProducts(options);
-        const result = await PM.getProducts(options);
+        //const result = await PS.getProducts(options);
+        const result = await PS.getProducts(options);
         
         res.render("home", { 
             products: result.payload,
@@ -87,8 +87,8 @@ router.get("/carts", isAuthenticated, async (req, res) => {
         
         const cartId = req.user.cart;
         console.log("carrito:", cartId);
-        //const cart = await CM.getCartById(cartId);
-        const cart = await CM.getCartById(cartId);
+        //const cart = await CS.getCartById(cartId);
+        const cart = await CS.getCartById(cartId);
         
         if (!cart) {
             return res.status(404).render("error", { 
@@ -115,8 +115,8 @@ router.get("/carts", isAuthenticated, async (req, res) => {
 router.get("/carts/:cid", isAuthenticated, async (req, res) => {
     try {
         const cartId = req.params.cid;
-        //const cart = await CM.getCartById(cartId);
-        const cart = await CM.getCartById(cartId);
+        //const cart = await CS.getCartById(cartId);
+        const cart = await CS.getCartById(cartId);
         
         if (!cart) {
             return res.status(404).render("error", { 

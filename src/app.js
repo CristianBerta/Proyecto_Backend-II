@@ -6,7 +6,6 @@ import productsRouter from "./routers/productsRouter.js";
 import cartsRouter from "./routers/cartsRouter.js";
 import viewsRouter from "./routers/viewsRouter.js";
 import sessionsRouter from "./routers/sessionsRouter.js";
-//import ProductManagerDB from "./dao/db/ProductManager.db.js";
 import ProductService from "./services/product.service.js";
 import helpers from "./views/helpers/helpers.js";
 import mongoose from "mongoose";
@@ -46,7 +45,6 @@ app.use("/api/carts", cartsRouter);
 app.use("/api/sessions", sessionsRouter);
 app.use("/", viewsRouter);
 
-//const PM = new ProductManagerDB();
 const PS = new ProductService();
 
 socketServer.on("connection", async socket => {

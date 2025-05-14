@@ -1,4 +1,4 @@
-import ProductRepository from '../repositories/product.repository.js';
+import ProductRepository from '../repositories/Product.Repository.js';
 
 class ProductService {
     constructor() {
@@ -25,7 +25,7 @@ class ProductService {
         }
     }
 
-    async createProduct(productData) {
+    async addProduct(productData) {
         try {
             // Validación básica
             if (!productData.title || !productData.description || !productData.code ||
@@ -42,7 +42,7 @@ class ProductService {
                 throw new Error(`Ya existe un producto con el código ${productData.code}`);
             }
 
-            return await this.productRepository.createProduct(productData);
+            return await this.productRepository.addProduct(productData);
         } catch (error) {
             throw new Error(`Error en el servicio al crear producto: ${error.message}`);
         }

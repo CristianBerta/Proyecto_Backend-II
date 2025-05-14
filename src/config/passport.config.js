@@ -2,16 +2,16 @@ import passport from "passport";
 import local from "passport-local";
 import jwt from "passport-jwt";
 import bcrypt from "bcrypt";
-import UserManagerDB from "../dao/db/UserManager.db.js";
-import CartManagerDB from "../dao/db/CartManager.db.js";
+import UserService from "../services/user.service.js";
+import CartService from "../services/cart.service.js";
 import config from "./config.js";
 
 const LocalStrategy = local.Strategy;
 const JWTStrategy = jwt.Strategy;
 const ExtractJWT = jwt.ExtractJwt;
 
-const userManager = new UserManagerDB();
-const cartManager = new CartManagerDB();
+const userService = new UserService();
+const cartService = new CartService();
 
 const initializePassport = () => {
     //Estrategia Registro
@@ -21,14 +21,14 @@ const initializePassport = () => {
             try {
                 const { first_name, last_name, age } = req.body;
 
-                const user = await userManager.getUserByEmail(email);
+                const user = await userService.getUserByEmail(email);
                 if (user) {
                     return done(null, false, { message: 'User already exists' });
                 }
 
-                const cart = await cartManager.createCart();
+                const cart = await cartService.createCart();
 
-                const newUser = await userManager.createUser({
+                const newUser = await userService.createUser({
                     first_name,
                     last_name,
                     email,
@@ -49,7 +49,7 @@ const initializePassport = () => {
         { usernameField: 'email' },
         async (email, password, done) => {
             try {
-                const user = await userManager.getUserByEmail(email);
+                const user = await userService.getUserByEmail(email);
                 if (!user) {
                     return done(null, false, { message: 'User not found' });
                 }
@@ -83,7 +83,7 @@ const initializePassport = () => {
         },
         async (jwt_payload, done) => {
             try {
-                const user = await userManager.getUserById(jwt_payload.id);
+                const user = await userService.getUserById(jwt_payload.id);
                 if (!user){
                     return done(null, false);
                 }
@@ -111,7 +111,7 @@ const initializePassport = () => {
         },
         async (jwt_payload, done) => {
             try {
-                const user = await userManager.getUserById(jwt_payload.id);
+                const user = await userService.getUserById(jwt_payload.id);
                 if (!user) {
                     return done(null, false);
                 }
@@ -128,7 +128,7 @@ const initializePassport = () => {
 
     passport.deserializeUser(async (id, done) => {
         try {
-            const user = await userManager.getUserById(id);
+            const user = await userService.getUserById(id);
             done(null, user);
         } catch (error) {
             done(error);

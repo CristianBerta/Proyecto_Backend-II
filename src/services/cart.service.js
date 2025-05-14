@@ -1,5 +1,5 @@
-import CartRepository from '../repositories/cart.repository.js';
-import ProductRepository from '../repositories/product.repository.js';
+import CartRepository from '../repositories/Cart.Repository.js';
+import ProductRepository from '../repositories/Product.Repository.js';
 import mongoose from 'mongoose';
 
 class CartService {
@@ -51,7 +51,7 @@ class CartService {
             }
 
             // Verificar si el producto existe
-            const product = await this.productRepository.getCartById(productId);
+            const product = await this.productRepository.getProductById(productId);
             if (!product) {
                 throw new Error(`Producto con ID ${productId} no encontrado`);
             }
@@ -102,7 +102,7 @@ class CartService {
                     throw new Error(`El ID del producto ${item.product} no es válido`);
                 }
 
-                const product = await this.productRepository.getCartById(item.product);
+                const product = await this.productRepository.getProductById(item.product);
                 if (!product) {
                     throw new Error(`Producto con ID ${item.product} no encontrado`);
                 }
@@ -133,7 +133,7 @@ class CartService {
             }
 
             // Verificar si el producto existe y tiene stock suficiente
-            const product = await this.productRepository.getCartById(productId);
+            const product = await this.productRepository.getProductById(productId);
             if (!product) {
                 throw new Error(`Producto con ID ${productId} no encontrado`);
             }

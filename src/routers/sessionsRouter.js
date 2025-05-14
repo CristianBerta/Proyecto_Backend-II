@@ -2,6 +2,7 @@ import { Router } from "express";
 import passport from "passport";
 import jwt from "jsonwebtoken";
 import config from "../config/config.js";
+import UserDTO from "../dto/UserDTO.js";
 
 const router = Router();
 
@@ -51,17 +52,12 @@ router.post("/logout", (req, res) => {
 router.get("/current",
     passport.authenticate('current', { session: false }),
     (req, res) => {
-        const user = {
-            id: req.user._id,
-            first_name: req.user.first_name,
-            last_name: req.user.last_name,
-            email: req.user.email,
-            age: req.user.age,
-            cart: req.user.cart,
-            role: req.user.role
-        };
-
-        res.json({ status: "success", user });
+        if (!req.user){
+            return res.status(401).json({ status: "error", message: "Usuario no autenticado." });
+        }
+        
+        const userToDisplay = new UserDTO(req.user);
+        res.json({ status: "success", user: userToDisplay });
     }
 );
 
