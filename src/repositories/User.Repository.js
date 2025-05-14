@@ -1,19 +1,43 @@
-class UserRepository {
-    constructor(userDao) {
-        this.userDao = userDao;
-    }
+import mongoose from 'mongoose';
+import userModel from "../dao/models/user.model.js";
+import bcrypt from "bcrypt";
 
+class UserRepository {
+    constructor() {
+            this.userModel = userModel;
+        }
+        
     async createUser(userData) {
-        return await this.userDao.createUser(userData);
+        try {
+            //Hash del password
+            const hashedPassword = bcrypt.hashSync(userData.password, 10);
+
+            const user = await this.userModel.create({
+                ...userData,
+                password: hashedPassword
+            });
+
+            return user;
+        } catch (error) {
+            throw new Error(`Error creating user: ${error.message}`);
+        }
     }
 
     async getUserByEmail(email) {
-        return await this.userDao.getUserByEmail(email);
+        try {
+            return await this.userModel.findOne({ email }).populate('email').lean();
+        } catch (error) {
+            throw new Error(`Error al obtener el usuario por email: ${error.message}`);
+        }
     }
 
     async getUserById(id) {
-        return await this.userDao.getUserById(id);
+        try {
+            return await this.userModel.findById(id).populate('cart').lean();
+        } catch (error) {
+            throw new Error(`Error al obtener el usuario por ID: ${error.message}`);
+        }
     }
 }
 
-export default UserRepository;
+export default UserManagerDB;

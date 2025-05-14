@@ -6,7 +6,8 @@ import productsRouter from "./routers/productsRouter.js";
 import cartsRouter from "./routers/cartsRouter.js";
 import viewsRouter from "./routers/viewsRouter.js";
 import sessionsRouter from "./routers/sessionsRouter.js";
-import ProductManagerDB from "./dao/db/ProductManager.db.js";
+//import ProductManagerDB from "./dao/db/ProductManager.db.js";
+import ProductService from "./services/product.service.js";
 import helpers from "./views/helpers/helpers.js";
 import mongoose from "mongoose";
 import passport from "passport";
@@ -45,12 +46,13 @@ app.use("/api/carts", cartsRouter);
 app.use("/api/sessions", sessionsRouter);
 app.use("/", viewsRouter);
 
-const PM = new ProductManagerDB();
+//const PM = new ProductManagerDB();
+const PS = new ProductService();
 
 socketServer.on("connection", async socket => {
     console.log("Nuevo cliente conectado");
     try {
-        const products = await PM.getProducts();
+        const products = await PS.getProducts();
         socket.emit("realtimeproducts", products.payload || products);
     } catch (error) {
         console.error("Error al enviar productos:", error);
@@ -59,9 +61,9 @@ socketServer.on("connection", async socket => {
 
     socket.on("nuevoProducto", async data => {
         try {
-            await PM.addProduct(data);
+            await PS.addProduct(data);
             console.log("Se agregó un nuevo producto!");
-            const updatedProducts = await PM.getProducts();
+            const updatedProducts = await PS.getProducts();
             socketServer.emit("realtimeproducts", updatedProducts.payload || updatedProducts);
         } catch (error) {
             console.error("Error al agregar producto:", error);
@@ -70,9 +72,9 @@ socketServer.on("connection", async socket => {
 
     socket.on("eliminarProducto", async id => {
         try {
-            await PM.deleteProduct(id);
+            await PS.deleteProduct(id);
             console.log("Se eliminó un producto!");
-            const updatedProducts = await PM.getProducts();
+            const updatedProducts = await PS.getProducts();
             socketServer.emit("realtimeproducts", updatedProducts.payload || updatedProducts);
         } catch (error) {
             console.error("Error al eliminar producto:", error);

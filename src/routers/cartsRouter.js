@@ -1,16 +1,12 @@
 import { Router } from "express";
-import CartManagerDB from "../dao/db/CartManager.db.js";
-import CartRepository from "../repositories/cart.repository.js";
-import UserManagerDB from "../dao/db/UserManager.db.js";
-import UserRepository from "../repositories/user.repository.js";
+import CartService from "../services/cart.service.js";
+import UserService from "../services/user.service.js";
 import mongoose from "mongoose";
 import { isAuthenticated } from "../middlewares/auth.js";
 
 const cartsRouter = Router();
-const CM = new CartManagerDB();
-const CR = new CartRepository(CM);
-const UM = new UserManagerDB();
-const UR = new UserRepository(UM);
+const CS = new CartService();
+const US = new UserService();
 
 // Validación de ID como middleware
 const validateId = (req, res, next) => {
@@ -30,8 +26,8 @@ const validateId = (req, res, next) => {
 //Crear carrito
 cartsRouter.post("/", isAuthenticated, async (req, res) => {
     try {
-        //const newCart = await CM.createCart();
-        const newCart = await CR.createCart();
+        //const newCart = await CS.createCart();
+        const newCart = await CS.createCart();
         res.status(201).json(newCart);
     } catch (error) {
         console.error("Error al crear el carrito:", error);
@@ -42,8 +38,8 @@ cartsRouter.post("/", isAuthenticated, async (req, res) => {
 //Obtener todos los carritos
 cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
     try {
-        //const user = await UM.getUserById(req.user.id);
-        const user = await UR.getUserById(req.user.id);
+        //const user = await US.getUserById(req.user.id);
+        const user = await US.getUserById(req.user.id);
 
         if (!user) {
             return res.status(404).json({ error: "Usuario no encontrado" });
@@ -53,8 +49,8 @@ cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
             return res.status(404).json({ error: "No tienes un carrito asociado a la cuenta" });
         }
 
-        //const cart = await CM.getCartById(user.cart.toString());
-        const cart = await CR.getCartById(user.cart.toString());
+        //const cart = await CS.getCartById(user.cart.toString());
+        const cart = await CS.getCartById(user.cart.toString());
         if (cart) {
             res.json(cart);
         } else {
@@ -70,8 +66,8 @@ cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
 cartsRouter.get("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
-        //const cart = await CM.getCartById(cartId);
-        const cart = await CR.getCartById(cartId);
+        //const cart = await CS.getCartById(cartId);
+        const cart = await CS.getCartById(cartId);
         if (cart) {
             res.json(cart);
         } else {
@@ -87,8 +83,8 @@ cartsRouter.get("/:cid", isAuthenticated, validateId, async (req, res) => {
 cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, res) => {
     try {
         const productId = req.params.pid;
-        //const user = await UM.getUserById(req.user.id);
-        const user = await UR.getUserById(req.user.id);
+        //const user = await US.getUserById(req.user.id);
+        const user = await US.getUserById(req.user.id);
 
         if (!user.cart) {
             return res.status(404).json({ error: "No tienes un carrito asociado a la cuenta" });
@@ -96,8 +92,8 @@ cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, 
         
         const cartId = user.cart._id.toString();
         console.log(cartId);
-        //const cart = await CM.addProductToCart(cartId, productId);
-        const cart = await CR.addProductToCart(cartId, productId);
+        //const cart = await CS.addProductToCart(cartId, productId);
+        const cart = await CS.addProductToCart(cartId, productId);
         
         if (cart) {
             res.json(cart);
@@ -116,8 +112,8 @@ cartsRouter.delete("/:cid/products/:pid", isAuthenticated, validateId, async (re
         const cartId = req.params.cid;
         const productId = req.params.pid;
         
-        //const updatedCart = await CM.removeProductFromCart(cartId, productId);
-        const updatedCart = await CR.removeProductFromCart(cartId, productId);
+        //const updatedCart = await CS.removeProductFromCart(cartId, productId);
+        const updatedCart = await CS.removeProductFromCart(cartId, productId);
         if (updatedCart) {
             res.json({ 
                 status: "success", 
@@ -150,8 +146,8 @@ cartsRouter.put("/:cid", isAuthenticated, validateId, async (req, res) => {
             }
         }
         
-        //const updatedCart = await CM.updateCart(cartId, products);
-        const updatedCart = await CR.updateCart(cartId, products);
+        //const updatedCart = await CS.updateCart(cartId, products);
+        const updatedCart = await CS.updateCart(cartId, products);
         if (updatedCart) {
             res.json({ 
                 status: "success", 
@@ -179,8 +175,8 @@ cartsRouter.put("/:cid/products/:pid", isAuthenticated, validateId, async (req, 
             });
         }
         
-        //const updatedCart = await CM.updateProductQuantity(cartId, productId, quantity);
-        const updatedCart = await CR.updateProductQuantity(cartId, productId, quantity);
+        //const updatedCart = await CS.updateProductQuantity(cartId, productId, quantity);
+        const updatedCart = await CS.updateProductQuantity(cartId, productId, quantity);
         if (updatedCart) {
             res.json({ 
                 status: "success", 
@@ -201,8 +197,8 @@ cartsRouter.delete("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         
-        //const emptyCart = await CM.clearCart(cartId);
-        const emptyCart = await CR.clearCart(cartId);
+        //const emptyCart = await CS.clearCart(cartId);
+        const emptyCart = await CS.clearCart(cartId);
         if (emptyCart) {
             res.json({ 
                 status: "success", 

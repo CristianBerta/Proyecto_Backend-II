@@ -1,12 +1,12 @@
 import { Router } from "express";
 import passport from "passport";
 import { isAuthenticated, isAdmin } from "../middlewares/auth.js";
-import ProductManagerDB from "../dao/db/ProductManager.db.js";
-import ProductRepository from "../repositories/product.repository.js";
+//import ProductManagerDB from "../dao/db/ProductManager.db.js";
+import ProductService from "../services/product.service.js";
 
 const productsRouter = Router();
-const PM = new ProductManagerDB();
-const PR = new ProductRepository(PM);
+//const PM = new ProductManagerDB();
+const PS = new ProductService();
 
 //Obtener todos los productos (público)
 productsRouter.get("/", async (req, res) => {
@@ -30,7 +30,7 @@ productsRouter.get("/", async (req, res) => {
 
         // Obtener productos con filtros
         //const products = await PM.getProducts(options);
-        const products = await PR.getProducts(options);
+        const products = await PS.getProducts(options);
 
         res.send({
             status: "success",
@@ -54,7 +54,7 @@ productsRouter.get("/", async (req, res) => {
 productsRouter.get("/:pid", async (req, res) => {
     try {
         //const product = await PM.getProductById(req.params.pid);
-        const product = await PR.getProductById(req.params.pid);
+        const product = await PS.getProductById(req.params.pid);
         if (product) {
             res.json(product);
         } else {
@@ -73,7 +73,7 @@ productsRouter.post("/", isAuthenticated, isAdmin, async (req, res) => {
             return res.status(400).json({ error: "Faltan campos obligatorios" });
         }
         //const newProduct = await PM.addProduct({ title, description, code, price, status, stock, category, thumbnails });
-        const newProduct = await PR.addProduct({ title, description, code, price, status, stock, category, thumbnails });
+        const newProduct = await PS.addProduct({ title, description, code, price, status, stock, category, thumbnails });
         res.status(201).json({
             status: "success",
             message: "Producto creado exitosamente", 
@@ -89,7 +89,7 @@ productsRouter.post("/", isAuthenticated, isAdmin, async (req, res) => {
 productsRouter.put("/:pid", isAuthenticated, isAdmin, async (req, res) => {
     try {
         //const updatedProduct = await PM.updateProduct(req.params.pid, req.body);
-        const updatedProduct = await PR.updateProduct(req.params.pid, req.body);
+        const updatedProduct = await PS.updateProduct(req.params.pid, req.body);
         if (updatedProduct) {
             res.json({
                 status: "success",
@@ -109,7 +109,7 @@ productsRouter.put("/:pid", isAuthenticated, isAdmin, async (req, res) => {
 productsRouter.delete("/:pid", isAuthenticated, isAdmin, async (req, res) => {
     try {
         //const deleted = await PM.deleteProduct(req.params.pid);
-        const deleted = await PR.deleteProduct(req.params.pid);
+        const deleted = await PS.deleteProduct(req.params.pid);
         if (deleted) {
             res.json({ status: "success", message: "Producto eliminado exitosamente" });
         } else {
