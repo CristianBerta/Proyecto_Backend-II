@@ -1,4 +1,7 @@
 import passport from "passport";
+import ProductService from "../services/product.service.js";
+
+const PS = new ProductService();
 
 export const isAuthenticated = (req, res, next) => {
     passport.authenticate('current', { session: false }, (err, user, info) => { //jwt=current
@@ -13,14 +16,14 @@ export const isAuthenticated = (req, res, next) => {
     })(req, res, next);
 };
 
-export const isAdmin = (req, res, next) => {
-    if (req.user && req.user.role === 'admin') {
-        return next();
-    }
-    return res.status(403).json({ status: "error", message: "Acceso Denegado" });
-};
+// export const isAdmin = (req, res, next) => {
+//     if (req.user && req.user.role === 'admin') {
+//         return next();
+//     }
+//     return res.status(403).json({ status: "error", message: "Acceso Denegado" });
+// };
 
-// NUEVO: Middleware de autorización basado en roles
+//Middleware de autorización basado en roles
 export const authorizeRoles = (allowedRoles) => {
     return (req, res, next) => {
         // if (!req.user || !req.user.role) {
@@ -45,5 +48,32 @@ export const authorizeRoles = (allowedRoles) => {
         }
 
         return res.status(403).json({ status: "error", message: `Acceso Denegado - Se requiere uno de los siguientes roles: ${allowedRoles.join(', ')}`});
+    };
+};
+
+// Middleware para verificar si puede comprar un producto
+export const canPurchaseProduct = (productService) => {
+    return async (req, res, next) => {
+        try {
+            // Si es usuario puede comprar
+            if (req.user.role === 'user') {
+                return next();
+            }
+            
+            const productId = req.params.pid || req.body.productId;
+            if (!productId) {
+                return res.status(400).json({ status: "error", message: "ID de producto no proporcionado" });
+            }
+            
+            const product = await PS.getProductById(productId);
+            if (!product) {
+                return res.status(404).json({ status: "error", message: "Producto no encontrado" });
+            }
+            
+            return next();
+        } catch (error) {
+            console.error("Error en middleware canPurchaseProduct:", error);
+            return res.status(500).json({ status: "error", message: "Error interno del servidor" });
+        }
     };
 };

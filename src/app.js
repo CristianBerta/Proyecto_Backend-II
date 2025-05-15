@@ -9,6 +9,7 @@ import cartsRouter from "./routers/cartsRouter.js";
 import viewsRouter from "./routers/viewsRouter.js";
 import sessionsRouter from "./routers/sessionsRouter.js";
 import passwordResetRouter from "./routers/passwordResetPassword.js";
+import ticketRouter from "./routers/ticketRouter.js";
 import ProductService from "./services/product.service.js";
 
 import helpers from "./views/helpers/helpers.js";
@@ -56,6 +57,7 @@ app.use("/api/sessions", sessionsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
 app.use("/api/password", passwordResetRouter);
+app.use("/api/ticket", ticketRouter);
 
 const PS = new ProductService();
 
