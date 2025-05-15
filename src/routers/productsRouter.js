@@ -1,6 +1,5 @@
 import { Router } from "express";
-import passport from "passport";
-import { isAuthenticated, isAdmin } from "../middlewares/auth.js";
+import { isAuthenticated, authorizeRoles } from "../middlewares/auth.js";
 import ProductService from "../services/product.service.js";
 
 const productsRouter = Router();
@@ -64,13 +63,12 @@ productsRouter.get("/:pid", async (req, res) => {
 });
 
 //Crear producto (solo admin)
-productsRouter.post("/", isAuthenticated, isAdmin, async (req, res) => {
+productsRouter.post("/", isAuthenticated, authorizeRoles(['admin']), async (req, res) => {
     try {
         const { title, description, code, price, status, stock, category, thumbnails } = req.body;
         if (!title || !description || !code || !price || !stock || !category) {
             return res.status(400).json({ error: "Faltan campos obligatorios" });
         }
-        //const newProduct = await PM.addProduct({ title, description, code, price, status, stock, category, thumbnails });
         const newProduct = await PS.addProduct({ title, description, code, price, status, stock, category, thumbnails });
         res.status(201).json({
             status: "success",
@@ -84,9 +82,8 @@ productsRouter.post("/", isAuthenticated, isAdmin, async (req, res) => {
 });
 
 //Actualizar producto (solo admin)
-productsRouter.put("/:pid", isAuthenticated, isAdmin, async (req, res) => {
+productsRouter.put("/:pid", isAuthenticated, authorizeRoles(['admin']), async (req, res) => {
     try {
-        //const updatedProduct = await PM.updateProduct(req.params.pid, req.body);
         const updatedProduct = await PS.updateProduct(req.params.pid, req.body);
         if (updatedProduct) {
             res.json({
@@ -104,9 +101,8 @@ productsRouter.put("/:pid", isAuthenticated, isAdmin, async (req, res) => {
 });
 
 //Eliminar producto (solo admin)
-productsRouter.delete("/:pid", isAuthenticated, isAdmin, async (req, res) => {
+productsRouter.delete("/:pid", isAuthenticated, authorizeRoles(['admin']), async (req, res) => {
     try {
-        //const deleted = await PM.deleteProduct(req.params.pid);
         const deleted = await PS.deleteProduct(req.params.pid);
         if (deleted) {
             res.json({ status: "success", message: "Producto eliminado exitosamente" });

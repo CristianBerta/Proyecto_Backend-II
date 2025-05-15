@@ -2,7 +2,7 @@ import { Router } from "express";
 import CartService from "../services/cart.service.js";
 import UserService from "../services/user.service.js";
 import mongoose from "mongoose";
-import { isAuthenticated } from "../middlewares/auth.js";
+import { isAuthenticated, authorizeRoles } from "../middlewares/auth.js";
 
 const cartsRouter = Router();
 const CS = new CartService();
@@ -26,7 +26,6 @@ const validateId = (req, res, next) => {
 //Crear carrito
 cartsRouter.post("/", isAuthenticated, async (req, res) => {
     try {
-        //const newCart = await CS.createCart();
         const newCart = await CS.createCart();
         res.status(201).json(newCart);
     } catch (error) {
@@ -80,7 +79,7 @@ cartsRouter.get("/:cid", isAuthenticated, validateId, async (req, res) => {
 });
 
 //Agregar producto al carrito
-cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, res) => {
+cartsRouter.post("/user/product/:pid", isAuthenticated, authorizeRoles(['user']), validateId, async (req, res) => {
     try {
         const productId = req.params.pid;
         //const user = await US.getUserById(req.user.id);
@@ -91,8 +90,6 @@ cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, 
         }
         
         const cartId = user.cart._id.toString();
-        console.log(cartId);
-        //const cart = await CS.addProductToCart(cartId, productId);
         const cart = await CS.addProductToCart(cartId, productId);
         
         if (cart) {
@@ -107,12 +104,16 @@ cartsRouter.post("/user/product/:pid", isAuthenticated, validateId, async (req, 
 });
 
 //Eliminar producto del carrito
-cartsRouter.delete("/:cid/products/:pid", isAuthenticated, validateId, async (req, res) => {
+cartsRouter.delete("/:cid/products/:pid", isAuthenticated, authorizeRoles(['user']), validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
+
+        // Verificación adicional: El usuario solo puede modificar SU PROPIO carrito
+        if (req.user.role === 'user' && (!req.user.cart || req.user.cart.toString() !== cartId)) {
+            return res.status(403).json({ status: "error", message: "Acceso Denegado - No puedes modificar este carrito." });
+        }
         
-        //const updatedCart = await CS.removeProductFromCart(cartId, productId);
         const updatedCart = await CS.removeProductFromCart(cartId, productId);
         if (updatedCart) {
             res.json({ 
@@ -129,6 +130,7 @@ cartsRouter.delete("/:cid/products/:pid", isAuthenticated, validateId, async (re
     }
 });
 
+//Actualizar carrito
 cartsRouter.put("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
@@ -163,11 +165,16 @@ cartsRouter.put("/:cid", isAuthenticated, validateId, async (req, res) => {
     }
 });
 
-cartsRouter.put("/:cid/products/:pid", isAuthenticated, validateId, async (req, res) => {
+//Actualizar cantidad de productos
+cartsRouter.put("/:cid/products/:pid", isAuthenticated, authorizeRoles(['user']), validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
         const productId = req.params.pid;
         const { quantity } = req.body;
+
+        if (req.user.role === 'user' && (!req.user.cart || req.user.cart.toString() !== cartId)) {
+            return res.status(403).json({ status: "error", message: "Acceso Denegado - No puedes modificar este carrito." });
+        }
         
         if (!quantity || quantity <= 0 || !Number.isInteger(quantity)) {
             return res.status(400).json({ 
@@ -193,11 +200,14 @@ cartsRouter.put("/:cid/products/:pid", isAuthenticated, validateId, async (req, 
 });
 
 //Vaciar carrito
-cartsRouter.delete("/:cid", isAuthenticated, validateId, async (req, res) => {
+cartsRouter.delete("/:cid", isAuthenticated, authorizeRoles(['user']), validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
+
+        if (req.user.role === 'user' && (!req.user.cart || req.user.cart.toString() !== cartId)) {
+            return res.status(403).json({ status: "error", message: "Acceso Denegado - No puedes modificar este carrito." });
+        }
         
-        //const emptyCart = await CS.clearCart(cartId);
         const emptyCart = await CS.clearCart(cartId);
         if (emptyCart) {
             res.json({ 

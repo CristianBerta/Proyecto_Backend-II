@@ -87,7 +87,7 @@ const initializePassport = () => {
                 if (!user){
                     return done(null, false);
                 }
-                return done(null, jwt_payload);
+                return done(null, user);
             } catch (error) {
                 return done(error);
             }
