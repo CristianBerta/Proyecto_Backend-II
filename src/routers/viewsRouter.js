@@ -1,11 +1,13 @@
 import { Router } from "express";
 import ProductService from "../services/product.service.js";
 import CartService from "../services/cart.service.js";
+import UserService from "../services/user.service.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 
 const router = Router();
 const PS = new ProductService();
 const CS = new CartService();
+const US = new UserService();
 
 router.get("/login", (req, res) => {
     res.render("login");
@@ -115,7 +117,6 @@ router.get("/carts", isAuthenticated, async (req, res) => {
 router.get("/carts/:cid", isAuthenticated, async (req, res) => {
     try {
         const cartId = req.params.cid;
-        //const cart = await CS.getCartById(cartId);
         const cart = await CS.getCartById(cartId);
         
         if (!cart) {
@@ -136,6 +137,24 @@ router.get("/carts/:cid", isAuthenticated, async (req, res) => {
         console.error("Error al obtener el carrito:", error);
         res.status(500).render("error", { 
             message: "Error al cargar el carrito" 
+        });
+    }
+});
+
+// Ruta para mostrar formulario de recuperación de contraseña
+router.get("/forgot-password", (req, res) => {
+    res.render("forgotPassword");
+});
+
+// Ruta para mostrar formulario de reset de contraseña con token
+router.get("/reset-password/:token", async (req, res) => {
+    try {
+        const { token } = req.params;
+        await US.verifyResetToken(token);
+        res.render("resetPassword");
+    } catch (error) {
+        res.render("error", { 
+            message: "El enlace para restablecer la contraseña es inválido o ha expirado." 
         });
     }
 });

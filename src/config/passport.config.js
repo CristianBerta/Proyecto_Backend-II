@@ -28,7 +28,7 @@ const initializePassport = () => {
 
                 const cart = await cartService.createCart();
 
-                const newUser = await userService.createUser({
+                const newUser = await userService.registerUser({
                     first_name,
                     last_name,
                     email,

@@ -1,18 +1,23 @@
 import express from "express";
+import session from "express-session";
 import handlebars from "express-handlebars";
 import { Server } from "socket.io";
 import __dirname from "./utils.js";
+
 import productsRouter from "./routers/productsRouter.js";
 import cartsRouter from "./routers/cartsRouter.js";
 import viewsRouter from "./routers/viewsRouter.js";
 import sessionsRouter from "./routers/sessionsRouter.js";
+import passwordResetRouter from "./routers/passwordResetPassword.js";
 import ProductService from "./services/product.service.js";
+
 import helpers from "./views/helpers/helpers.js";
 import mongoose from "mongoose";
 import passport from "passport";
 import cookieParser from "cookie-parser";
 import initializePassport from "./config/passport.config.js";
 import config from "./config/config.js"
+import "./config/passport.config.js";
 
 const app = express();
 const port = 8080;
@@ -29,10 +34,16 @@ app.use(express.static(__dirname + "/public"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser(config.cookieSecret));
+app.use(session({
+    secret: config.cookieSecret,
+    resave: false,
+    saveUninitialized: false
+}));
 
 //Passport
 initializePassport();
 app.use(passport.initialize());
+app.use(passport.session());
 
 const connectDB = await mongoose.connect("mongodb+srv://cristian:Adidas88!@cluster0.ehtm7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 if (connectDB) {
@@ -40,10 +51,11 @@ if (connectDB) {
 }
 
 //Rutas
+app.use("/", viewsRouter);
+app.use("/api/sessions", sessionsRouter);
 app.use("/api/products", productsRouter);
 app.use("/api/carts", cartsRouter);
-app.use("/api/sessions", sessionsRouter);
-app.use("/", viewsRouter);
+app.use("/api/password", passwordResetRouter);
 
 const PS = new ProductService();
 
