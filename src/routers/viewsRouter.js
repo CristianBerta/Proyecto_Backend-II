@@ -2,12 +2,14 @@ import { Router } from "express";
 import ProductService from "../services/product.service.js";
 import CartService from "../services/cart.service.js";
 import UserService from "../services/user.service.js";
-import { isAuthenticated } from "../middlewares/auth.js";
+import TicketService from "../services/ticket.service.js";
+import { isAuthenticated, authorizeRoles } from "../middlewares/auth.js";
 
 const router = Router();
 const PS = new ProductService();
 const CS = new CartService();
 const US = new UserService();
+const TS = new TicketService();
 
 router.get("/login", (req, res) => {
     res.render("login");
@@ -42,7 +44,6 @@ router.get("/", async (req, res) => {
             query: filterQuery
         };
         
-        //const result = await PS.getProducts(options);
         const result = await PS.getProducts(options);
         
         res.render("home", { 
@@ -79,7 +80,6 @@ router.get("/realtimeproducts", isAuthenticated, (req, res) => {
 
 router.get("/carts", isAuthenticated, async (req, res) => {
     try {
-        //Verificar si el usuario tiene un carrito
         if (!req.user || !req.user.cart) {
             console.log("Sin carrito:", req.user);
             return res.status(404).render("error", { 
@@ -88,8 +88,6 @@ router.get("/carts", isAuthenticated, async (req, res) => {
         }
         
         const cartId = req.user.cart;
-        console.log("carrito:", cartId);
-        //const cart = await CS.getCartById(cartId);
         const cart = await CS.getCartById(cartId);
         
         if (!cart) {
@@ -141,12 +139,12 @@ router.get("/carts/:cid", isAuthenticated, async (req, res) => {
     }
 });
 
-// Ruta para mostrar formulario de recuperación de contraseña
+//Ruta para mostrar formulario de recuperación de contraseña
 router.get("/forgot-password", (req, res) => {
     res.render("forgotPassword");
 });
 
-// Ruta para mostrar formulario de reset de contraseña con token
+//Ruta para mostrar formulario de reset de contraseña con token
 router.get("/reset-password/:token", async (req, res) => {
     try {
         const { token } = req.params;
@@ -155,6 +153,68 @@ router.get("/reset-password/:token", async (req, res) => {
     } catch (error) {
         res.render("error", { 
             message: "El enlace para restablecer la contraseña es inválido o ha expirado." 
+        });
+    }
+});
+
+//Historial de compras
+router.get("/tickets/history", isAuthenticated, async (req, res) => {
+    try {
+        const tickets = await TS.getTicketsByUser(req.user.email);
+        
+        res.render("ticketHistory", {
+            tickets,
+            user: req.user
+        });
+    } catch (error) {
+        console.error("Error al obtener historial de tickets:", error);
+        res.render("error", { 
+            error: "Error al cargar el historial de compras", 
+            message: error.message 
+        });
+    }
+});
+
+//Detalle de un ticket
+router.get("/tickets/:tid", isAuthenticated, async (req, res) => {
+    try {
+        const ticketId = req.params.tid;
+        const ticket = await TS.getTicketById(ticketId);
+        
+        if (req.user.role !== 'admin' && ticket.purchaser !== req.user.email) {
+            return res.status(403).render("error", { 
+                error: "Acceso denegado", 
+                message: "No tienes permiso para ver este ticket" 
+            });
+        }
+        
+        res.render("ticketDetail", {
+            ticket,
+            user: req.user
+        });
+    } catch (error) {
+        console.error("Error al obtener detalle del ticket:", error);
+        res.render("error", { 
+            error: "Error al cargar los detalles del ticket", 
+            message: error.message 
+        });
+    }
+});
+
+//Administracion para tickets (solo admin)
+router.get("/admin/tickets", isAuthenticated, authorizeRoles(['admin']), async (req, res) => {
+    try {
+        const tickets = await TS.getAllTickets();
+        
+        res.render("tickets", {
+            tickets,
+            user: req.user
+        });
+    } catch (error) {
+        console.error("Error al obtener todos los tickets:", error);
+        res.render("error", { 
+            error: "Error al cargar la administración de tickets", 
+            message: error.message 
         });
     }
 });

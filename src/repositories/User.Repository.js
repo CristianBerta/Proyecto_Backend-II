@@ -84,14 +84,12 @@ class UserRepository {
                 throw new Error('Token inválido o expirado');
             }
             
-            // Guardar la contraseña anterior en el historial (máximo 5)
             user.passwordHistory = user.passwordHistory || [];
             user.passwordHistory.push(user.password);
             if (user.passwordHistory.length > 5) {
-                user.passwordHistory.shift(); // Eliminar la más antigua si hay más de 5
+                user.passwordHistory.shift();
             }
             
-            // Actualizar contraseña y limpiar token
             user.password = newPassword;
             user.resetPasswordToken = null;
             user.resetPasswordExpires = null;

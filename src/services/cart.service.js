@@ -50,24 +50,20 @@ class CartService {
                 throw new Error('El ID del producto no es válido');
             }
 
-            // Verificar si el producto existe
             const product = await this.productRepository.getProductById(productId);
             if (!product) {
                 throw new Error(`Producto con ID ${productId} no encontrado`);
             }
 
-            // Verificar si el carrito existe
             const cart = await this.cartRepository.getCartById(cartId);
             if (!cart) {
                 throw new Error(`Carrito con ID ${cartId} no encontrado`);
             }
 
-            // Verificar si hay stock disponible
             if (product.stock <= 0) {
                 throw new Error(`El producto ${product.title} no tiene stock disponible`);
             }
 
-            // Verificar si ya tiene el producto en el carrito y si supera el stock disponible
             const existingProduct = cart.products.find(item => 
                 item.product._id.toString() === productId.toString()
             );
@@ -92,7 +88,6 @@ class CartService {
                 throw new Error("El formato de productos no es válido, debe ser un array");
             }
 
-            // Verificar que todos los productos existan y tengan stock suficiente
             for (const item of products) {
                 if (!item.product || !item.quantity || item.quantity <= 0) {
                     throw new Error("Cada producto debe tener 'product' (id) y 'quantity' (mayor a 0)");
@@ -132,7 +127,6 @@ class CartService {
                 throw new Error('La cantidad debe ser un número entero mayor a 0');
             }
 
-            // Verificar si el producto existe y tiene stock suficiente
             const product = await this.productRepository.getProductById(productId);
             if (!product) {
                 throw new Error(`Producto con ID ${productId} no encontrado`);

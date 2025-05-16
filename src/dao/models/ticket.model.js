@@ -54,7 +54,7 @@ const ticketSchema = new mongoose.Schema({
     }
 }, { timestamps: true });
 
-// Método para generar un código único
+//Metodo para generar un codigo
 ticketSchema.statics.generateUniqueCode = async function() {
     const timestamp = Date.now().toString();
     const randomNum = Math.floor(Math.random() * 10000).toString().padStart(4, '0');

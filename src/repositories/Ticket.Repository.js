@@ -6,10 +6,8 @@ import mongoose from 'mongoose';
 class TicketRepository {
     async createTicket(ticketData) {
         try {
-            // Generar código único para el ticket
             const code = await Ticket.generateUniqueCode();
             
-            // Crear el ticket con los datos proporcionados y el código generado
             const newTicket = new Ticket({
                 ...ticketData,
                 code

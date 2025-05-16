@@ -32,17 +32,16 @@ class UserService {
         return await this.userRepository.getUserById(id);
     }
 
-    // Métodos para recuperación de contraseña
+    //Métodos para recuperación de contraseña
     async requestPasswordReset(email) {
         const user = await this.userRepository.getUserByEmail(email);
         if (!user) {
             throw new Error('No existe un usuario con ese email.');
         }
 
-        // Crear token de recuperación
+        //Crear token de recuperación
         const { token } = await this.userRepository.createPasswordResetToken(email);
         
-        // Enviar email
         await this.emailService.sendPasswordResetEmail(email, token);
         
         return true;
@@ -62,23 +61,19 @@ class UserService {
             throw new Error('Token inválido o expirado.');
         }
 
-        // Verificar que la nueva contraseña no sea igual a la actual
         const isSamePassword = bcrypt.compareSync(newPassword, user.password);
         if (isSamePassword) {
             throw new Error('La nueva contraseña no puede ser igual a la anterior.');
         }
 
-        // Verificar que la nueva contraseña no esté en el historial
         const hashedNewPassword = bcrypt.hashSync(newPassword, 10);
         
-        // Verificar manualmente comparando con bcrypt
         for (const oldPassword of user.passwordHistory || []) {
             if (bcrypt.compareSync(newPassword, oldPassword)) {
                 throw new Error('No puedes usar una contraseña que ya has utilizado anteriormente.');
             }
         }
 
-        // Restablecer la contraseña
         await this.userRepository.resetPassword(token, hashedNewPassword);
         
         return true;

@@ -26,7 +26,6 @@ productsRouter.get("/", async (req, res) => {
         };
 
         // Obtener productos con filtros
-        //const products = await PM.getProducts(options);
         const products = await PS.getProducts(options);
 
         res.send({
@@ -50,7 +49,6 @@ productsRouter.get("/", async (req, res) => {
 //Obtener un producto por ID (público)
 productsRouter.get("/:pid", async (req, res) => {
     try {
-        //const product = await PM.getProductById(req.params.pid);
         const product = await PS.getProductById(req.params.pid);
         if (product) {
             res.json(product);

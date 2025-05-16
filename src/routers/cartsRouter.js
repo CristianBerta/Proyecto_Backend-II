@@ -37,7 +37,6 @@ cartsRouter.post("/", isAuthenticated, async (req, res) => {
 //Obtener todos los carritos
 cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
     try {
-        //const user = await US.getUserById(req.user.id);
         const user = await US.getUserById(req.user.id);
 
         if (!user) {
@@ -48,7 +47,6 @@ cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
             return res.status(404).json({ error: "No tienes un carrito asociado a la cuenta" });
         }
 
-        //const cart = await CS.getCartById(user.cart.toString());
         const cart = await CS.getCartById(user.cart.toString());
         if (cart) {
             res.json(cart);
@@ -65,7 +63,6 @@ cartsRouter.get("/user/cart", isAuthenticated, async (req, res) => {
 cartsRouter.get("/:cid", isAuthenticated, validateId, async (req, res) => {
     try {
         const cartId = req.params.cid;
-        //const cart = await CS.getCartById(cartId);
         const cart = await CS.getCartById(cartId);
         if (cart) {
             res.json(cart);
@@ -82,7 +79,6 @@ cartsRouter.get("/:cid", isAuthenticated, validateId, async (req, res) => {
 cartsRouter.post("/user/product/:pid", isAuthenticated, authorizeRoles(['user']), validateId, async (req, res) => {
     try {
         const productId = req.params.pid;
-        //const user = await US.getUserById(req.user.id);
         const user = await US.getUserById(req.user.id);
 
         if (!user.cart) {
@@ -109,7 +105,6 @@ cartsRouter.delete("/:cid/products/:pid", isAuthenticated, authorizeRoles(['user
         const cartId = req.params.cid;
         const productId = req.params.pid;
 
-        // Verificación adicional: El usuario solo puede modificar SU PROPIO carrito
         if (req.user.role === 'user' && (!req.user.cart || req.user.cart.toString() !== cartId)) {
             return res.status(403).json({ status: "error", message: "Acceso Denegado - No puedes modificar este carrito." });
         }
@@ -148,7 +143,6 @@ cartsRouter.put("/:cid", isAuthenticated, validateId, async (req, res) => {
             }
         }
         
-        //const updatedCart = await CS.updateCart(cartId, products);
         const updatedCart = await CS.updateCart(cartId, products);
         if (updatedCart) {
             res.json({ 
@@ -182,7 +176,6 @@ cartsRouter.put("/:cid/products/:pid", isAuthenticated, authorizeRoles(['user'])
             });
         }
         
-        //const updatedCart = await CS.updateProductQuantity(cartId, productId, quantity);
         const updatedCart = await CS.updateProductQuantity(cartId, productId, quantity);
         if (updatedCart) {
             res.json({ 

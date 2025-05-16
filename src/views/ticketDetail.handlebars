@@ -1,0 +1,83 @@
+<div class="container my-5">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Detalle del Ticket</h2>
+            <span class="badge {{#if (eq ticket.status 'completed')}}bg-success{{else if (eq ticket.status 'incomplete')}}bg-warning{{else}}bg-danger{{/if}} fs-6">
+                {{#if (eq ticket.status 'completed')}}Completada{{else if (eq ticket.status 'incomplete')}}Incompleta{{else}}Fallida{{/if}}
+            </span>
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p><strong>Código:</strong> {{ticket.code}}</p>
+                    <p><strong>Fecha:</strong> {{formatDate ticket.purchase_datetime}}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Cliente:</strong> {{ticket.purchaser}}</p>
+                    <p><strong>Total:</strong> ${{ticket.amount}}</p>
+                </div>
+            </div>
+
+            <h4 class="mb-3">Productos Comprados</h4>
+            {{#if ticket.products.length}}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each ticket.products}}
+                                <tr>
+                                    <td>{{title}}</td>
+                                    <td>${{price}}</td>
+                                    <td>{{quantity}}</td>
+                                    <td>${{multiply price quantity}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            {{else}}
+                <div class="alert alert-warning">No hay productos procesados correctamente en esta compra.</div>
+            {{/if}}
+
+            {{#if ticket.failedProducts.length}}
+                <h4 class="mb-3 mt-4">Productos No Procesados</h4>
+                <div class="table-responsive">
+                    <table class="table table-striped table-danger">
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Precio</th>
+                                <th>Cantidad</th>
+                                <th>Motivo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each ticket.failedProducts}}
+                                <tr>
+                                    <td>{{title}}</td>
+                                    <td>${{price}}</td>
+                                    <td>{{quantity}}</td>
+                                    <td>{{reason}}</td>
+                                </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            {{/if}}
+
+            <div class="text-center mt-4">
+                <a href="/tickets/history" class="btn btn-secondary me-2">Volver al Historial</a>
+                {{#if (eq ticket.status 'failed')}}
+                    <a href="/carts" class="btn btn-primary">Revisar Carrito</a>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>

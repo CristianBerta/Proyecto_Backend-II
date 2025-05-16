@@ -15,5 +15,10 @@ export default {
             style: 'currency',
             currency: 'ARS'
         }).format(price);
+    },
+
+    // Helpers para formatear fechas
+    formatDate: function(date) {
+        return new Date(date).toLocaleString();
     }
 };

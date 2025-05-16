@@ -10,14 +10,7 @@ class TicketService {
         this.productRepository = new ProductRepository();
     }
 
-    /**
-     * Procesa la compra de productos en un carrito
-     * @param {string} cartId - ID del carrito a procesar
-     * @param {string} userEmail - Email del usuario que realiza la compra
-     * @returns {Object} - Información del resultado de la compra
-     */
     async processTicket(cartId, userEmail) {
-        // Iniciar una sesión de transacción MongoDB
         const session = await mongoose.startSession();
         session.startTransaction();
 
@@ -26,7 +19,6 @@ class TicketService {
                 throw new Error('El ID del carrito no es válido');
             }
 
-            // Obtener el carrito con sus productos
             const cart = await this.cartRepository.getCartById(cartId);
             if (!cart || !cart.products || cart.products.length === 0) {
                 throw new Error('El carrito está vacío o no existe');
@@ -37,9 +29,7 @@ class TicketService {
             const failedProducts = [];
             let totalAmount = 0;
 
-            // Procesar cada producto en el carrito
             for (const item of productsToProcess) {
-                // Verificar si el producto existe y hay suficiente stock
                 const productId = item.product._id.toString();
                 const product = await this.productRepository.getProductById(productId);
                 
@@ -65,11 +55,9 @@ class TicketService {
                     continue;
                 }
 
-                // Actualizar el stock del producto
                 const newStock = product.stock - item.quantity;
                 await this.productRepository.updateProduct(product._id, { stock: newStock }, { session });
 
-                // Agregar a la lista de productos comprados
                 purchasedProducts.push({
                     product: product._id,
                     title: product.title,
@@ -77,18 +65,15 @@ class TicketService {
                     quantity: item.quantity
                 });
 
-                // Sumar al total
                 totalAmount += product.price * item.quantity;
             }
 
-            // Determinar el estado de la compra
             const status = failedProducts.length === 0 
                 ? 'completed' 
                 : purchasedProducts.length === 0 
                     ? 'failed' 
                     : 'incomplete';
 
-            // Crear el ticket
             const ticketData = {
                 purchaser: userEmail,
                 amount: totalAmount,
@@ -99,7 +84,6 @@ class TicketService {
             
             const newTicket = await this.ticketRepository.createTicket(ticketData);
 
-            // Actualizar el carrito: eliminar los productos comprados
             if (purchasedProducts.length > 0) {
                 const productIdsToRemove = purchasedProducts.map(p => p.product.toString());
                 
@@ -110,7 +94,6 @@ class TicketService {
                 await this.cartRepository.updateCart(cartId, remainingProducts);
             }
 
-            // Confirmar la transacción
             await session.commitTransaction();
             session.endSession();
 
@@ -121,7 +104,6 @@ class TicketService {
                 status
             };
         } catch (error) {
-            // Revertir la transacción en caso de error
             await session.abortTransaction();
             session.endSession();
             
@@ -130,11 +112,6 @@ class TicketService {
         }
     }
 
-    /**
-     * Obtiene un ticket por su ID
-     * @param {string} ticketId - ID del ticket
-     * @returns {Object} - Ticket encontrado
-     */
     async getTicketById(ticketId) {
         try {
             const ticket = await this.ticketRepository.getTicketById(ticketId);
@@ -147,11 +124,6 @@ class TicketService {
         }
     }
 
-    /**
-     * Obtiene todos los tickets de un usuario
-     * @param {string} userEmail - Email del usuario
-     * @returns {Array} - Lista de tickets del usuario
-     */
     async getTicketsByUser(userEmail) {
         try {
             return await this.ticketRepository.getTicketsByPurchaser(userEmail);
@@ -160,10 +132,6 @@ class TicketService {
         }
     }
 
-    /**
-     * Obtiene todos los tickets (para usuarios admin)
-     * @returns {Array} - Lista de todos los tickets
-     */
     async getAllTickets() {
         try {
             return await this.ticketRepository.getAllTickets();

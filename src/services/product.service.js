@@ -27,13 +27,11 @@ class ProductService {
 
     async addProduct(productData) {
         try {
-            // Validación básica
             if (!productData.title || !productData.description || !productData.code ||
                 !productData.price || !productData.stock || !productData.category) {
                 throw new Error('Faltan campos obligatorios');
             }
-
-            // Verificar si ya existe un producto con el mismo código
+            
             const existingProducts = await this.productRepository.getProducts({
                 query: { code: productData.code }
             });
@@ -50,13 +48,11 @@ class ProductService {
 
     async updateProduct(id, updatedFields) {
         try {
-            // Comprobar primero si el producto existe
             const existingProduct = await this.productRepository.getProductById(id);
             if (!existingProduct) {
                 throw new Error(`Producto con ID ${id} no encontrado`);
             }
 
-            // Si se actualiza el código, verificar que no exista otro producto con ese código
             if (updatedFields.code && updatedFields.code !== existingProduct.code) {
                 const productsWithSameCode = await this.productRepository.getProducts({
                     query: { code: updatedFields.code }

@@ -19,7 +19,7 @@ const validateId = (req, res, next) => {
 };
 
 // Procesar compra del carrito del usuario
-purchaseRouter.post("/process", isAuthenticated, authorizeRoles(['user']), async (req, res) => {
+ticketRouter.post("/process", isAuthenticated, authorizeRoles(['user']), async (req, res) => {
     try {
         const user = await US.getUserById(req.user.id);
 
@@ -60,7 +60,7 @@ purchaseRouter.post("/process", isAuthenticated, authorizeRoles(['user']), async
 });
 
 // Obtener historial de compras del usuario
-purchaseRouter.get("/history", isAuthenticated, authorizeRoles(['user', 'admin']), async (req, res) => {
+ticketRouter.get("/history", isAuthenticated, authorizeRoles(['user', 'admin']), async (req, res) => {
     try {
         const tickets = await TS.getTicketsByUser(req.user.email);
         
@@ -75,7 +75,7 @@ purchaseRouter.get("/history", isAuthenticated, authorizeRoles(['user', 'admin']
 });
 
 // Obtener detalle de un ticket específico
-purchaseRouter.get("/:tid", isAuthenticated, validateId, async (req, res) => {
+ticketRouter.get("/:tid", isAuthenticated, validateId, async (req, res) => {
     try {
         const ticketId = req.params.tid;
         const ticket = await TS.getTicketById(ticketId);
@@ -99,7 +99,7 @@ purchaseRouter.get("/:tid", isAuthenticated, validateId, async (req, res) => {
 });
 
 // Obtener todos los tickets (solo para admin)
-purchaseRouter.get("/admin/tickets", isAuthenticated, authorizeRoles(['admin']), async (req, res) => {
+ticketRouter.get("/admin/tickets", isAuthenticated, authorizeRoles(['admin']), async (req, res) => {
     try {
         const tickets = await TS.getAllTickets();
         

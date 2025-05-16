@@ -14,7 +14,6 @@ router.post("/forgot-password", async (req, res) => {
 
         await userService.requestPasswordReset(email);
         
-        // Por seguridad, siempre devolvemos éxito aunque el email no exista
         return res.status(200).json({ 
             status: "success", 
             message: "Si el email existe en nuestro sistema, recibirás instrucciones para restablecer tu contraseña." 
@@ -31,9 +30,6 @@ router.get("/reset-password/:token", async (req, res) => {
         const { token } = req.params;
         await userService.verifyResetToken(token);
         
-        // Si el token es válido, redirigir a la página de reset
-        // Aquí puedes manejar la redirección según tu frontend
-        // O devolver una respuesta JSON para que el frontend maneje la redirección
         return res.status(200).json({ status: "success", validToken: true });
     } catch (error) {
         return res.status(400).json({ 
